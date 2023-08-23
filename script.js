@@ -1,87 +1,60 @@
+const APIURL = "https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=04c35731a5ee918f014970082a0088b1&page=1";
+const IMGPATH = "https://image.tmdb.org/t/p/w1280";
+const SEARCHAPI = "https://api.themoviedb.org/3/search/movie?&api_key=04c35731a5ee918f014970082a0088b1&query=";
 
+// console.log( await fetch(APIURL).json());
 
-function numberFunction(data){
-    let textOutput = document.getElementById("output");
-    let oldValue = textOutput.value;
-    textOutput.value = oldValue + data;
+const moiveBox = document.querySelector("#movie-box")
+const getMovies = async (url) => {
+    const response = await fetch(url)
+    const data = await response.json()
+    console.log("data ", data);
+    showMovies(data)
 }
+getMovies(APIURL);
 
-function operatorFunction(data){
-    let textOutput = document.getElementById("output");
-    let oldValue = textOutput.value;
-    if(oldValue==''){
-        if( data=='+' || data=='-'){
-            textOutput.value = data
-        } 
-        
-        return;
-    }
 
-    let len = oldValue.length;
-    let lastChar = oldValue[len-1];
-   
-    if(lastChar =='+' || lastChar =='-' || lastChar =='*' || lastChar =='/' || lastChar =='%'){
-        let newValue = oldValue.slice(0, len-1);
-        textOutput.value = newValue + data;
-    }
-    else textOutput.value = oldValue + data;
-       
-}
-
-function decimalFunction(data){
-    let textOutput = document.getElementById("output");
-    let oldValue = textOutput.value;
-    let len = oldValue.length;
-    let lastChar = oldValue[len-1];
-    // if(lastChar =='.'){
-    //     let newValue = oldValue.slice(0, len-1);
-    //     textOutput.value = newValue + data;
-    // }
-    if((lastChar=='.')){
-
-    }
-    else{
-
-        textOutput.value = oldValue + data;
-    }
-
-}
-
-function getAnswer(){
-    let textOutput = document.getElementById("output");
-    let oldValue = textOutput.value;
-    let len = oldValue.length;
-    let lastChar = oldValue[len-1];
-    if(lastChar =='+' || lastChar =='-' || lastChar =='*' || lastChar =='/' || lastChar =='%'){
-        textOutput.value = 'error';
-        return;
-    }
-    if(textOutput.value){
-        let preValue = textOutput.value; 
-        let answer = eval(textOutput.value);
-        console.log("preValue ", preValue);
-        console.log("answer ", answer);
-        if(answer == preValue){
-            textOutput.value = 'error'
+const showMovies = (data) => {
+    moiveBox.innerHTML = "";
+    data.results.forEach(
+        (result) => {
+            const imagePath = result.poster_path === null ? "img/image-missing.png" : IMGPATH + result.poster_path;
+            // const box = `
+            // <div class="box">
+            //     <img src="${IMGPATH+result}" alt="" />
+            //     <div class="overlay">
+            //         <h2>Overview:</h2>
+            //         Lorem ipsum, dolor sit amet consectetur adipisicing elit. Perspiciatis iste doloribus quam voluptatum, illum unde nostrum dignissimos, mollitia, sapiente porro natus neque cupiditate distinctio quod possimus aliquid reiciendis vel. Soluta?
+            //     </div>
+            // </div>
+            // `
+            const box = document.createElement("div")
+            box.classList.add("box")
+            box.innerHTML = `
+                <img src="${imagePath}" alt="" />
+                <div class="overlay">
+                    <div class="title"> 
+                        <h2> ${result.original_title}  </h2>
+                        <span> ${result.vote_average} <span>
+                    </div>
+                    <h3>Overview:</h3>
+                    <p> 
+                        ${result.overview}
+                    </p>
+                 </div>
+            `
+            moiveBox.appendChild(box)
         }
-        else{
-             textOutput.value = answer;
-         }
-    } 
-
+    )
 }
 
-function ClearOuput(){
-    let textOutput = document.getElementById("output");
-    textOutput.value = '';
-}
-
-function backOuput(){
-    console.log("back");
-    let textOutput = document.getElementById("output");
-    let oldValue = textOutput.value;
-    let len = oldValue.length;
-    let currValue = oldValue.slice(0, len-1);
-    textOutput.value = currValue;
-
-}
+document.querySelector("#search").addEventListener(
+    "keyup",
+    function (event) {
+        if (event.target.value != "") {
+            getMovies(SEARCHAPI + event.target.value)
+        } else {
+            getMovies(APIURL);
+        }
+    }
+)
